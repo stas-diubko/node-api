@@ -3,8 +3,10 @@ import { Request, Response } from 'express';
 import * as jwt from 'jwt-then';
 import config from '../../config/config';
 import User from '../users/user.model';
+import Roles from '../roles/roles.model'
 
 export default class UserController {
+  
   public authenticate = async (req: Request, res: Response): Promise<any> => {
     const { email, pass } = req.body;
     
@@ -21,7 +23,7 @@ export default class UserController {
 
       const matchPasswords = await bcrypt.compare(pass, user.pass);
       
-      console.log(matchPasswords);
+     
 
       if (!matchPasswords) {
         return res.status(401).send({
@@ -29,16 +31,39 @@ export default class UserController {
           message: 'Not authorized'
         });
       }
+      
+      
+      
+      let isAdmin:any; 
+      const userData = {id: user._id, name: user.name, email: user.email, img: user.imgChange}
+        // console.log(userData);
+        const token = await jwt.sign( {userData}, config.JWT_ENCRYPTION, {
+          expiresIn: config.JWT_EXPIRATION
+        });
 
-      const token = await jwt.sign({ email }, config.JWT_ENCRYPTION, {
-        expiresIn: config.JWT_EXPIRATION
-      });
+       Roles.findById('5d7f6f73c9fdeb2d84355d1e', (err, roles) => {
+      
+        for(let i = 0; i < roles.admins.length; i++){
+          
+          if (roles.admins[i] == email) {
 
-      res.status(200).send({
-        success: true,
-        message: 'Token generated Successfully',
-        data: token
-      });
+            isAdmin = true;
+            
+          } else {
+            
+            isAdmin = false
+          }
+        }
+        
+        res.status(200).send({
+          success: true,
+          message: 'Token generated Successfully',
+          data: token,
+          isAdmin: isAdmin
+        });
+      })
+      
+      
     } catch (err) {
       res.status(500).send({
         success: false,
@@ -49,7 +74,7 @@ export default class UserController {
 
   public register = async (req: Request, res: Response): Promise<any> => {
     // const { name, lastName, email, password } = req.body;
-    const { name, email, pass, isAdmin, imgChange } = req.body;
+    const { name, email, pass, imgChange } = req.body;
     // console.log(req.body);
     
     try {
@@ -60,13 +85,18 @@ export default class UserController {
         name,
         email,
         pass: hash,
-        isAdmin,
         imgChange,
       });
 
       const newUser = await user.save();
 
-      // console.log(newUser);
+      Roles.findById('5d7f6f73c9fdeb2d84355d1e', (err, roles) => {
+        roles.users.push(email)
+        roles.save()
+      })
+
+      
+
 
       res.status(201).send({
         success: true,
