@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import * as jwt from 'jwt-then';
 import config from '../../config/config';
 import User from './user.model';
+import Roles from '../roles/roles.model'
 
 export default class UserController {
   public findAll = async (req: Request, res: Response): Promise<any> => {
@@ -54,21 +55,37 @@ export default class UserController {
   };
 
   public update = async (req: Request, res: Response): Promise<any> => {
-    const { name, lastName, email, password } = req.body;
+    const { name, imgChange} = req.body;
+    // console.log(name);
+    
     try {
       const userUpdated = await User.findByIdAndUpdate(
         req.params.id,
         {
           $set: {
             name,
-            lastName,
-            email,
-            password
+            imgChange
           }
         },
         { new: true }
       );
-      if (!userUpdated) {
+
+      let isAdmin:any; 
+      
+      Roles.findById('5d7f6f73c9fdeb2d84355d1e', async (err, roles) => {
+     
+       for(let i = 0; i < roles.admins.length; i++){
+         if (roles.admins[i] == userUpdated.email) {
+           isAdmin = true;
+         } else {
+           isAdmin = false
+         }
+       }
+       const userData = {id: userUpdated._id, name: userUpdated.name, email: userUpdated.email, img: userUpdated.imgChange, isAdmin: isAdmin}
+       const token = await jwt.sign( {userData}, config.JWT_ENCRYPTION, {
+         expiresIn: config.JWT_EXPIRATION
+       });
+       if (!userUpdated) {
         return res.status(404).send({
           success: false,
           message: 'User not found',
@@ -77,8 +94,12 @@ export default class UserController {
       }
       res.status(200).send({
         success: true,
-        data: userUpdated
+        data: token
       });
+
+     })
+
+      
     } catch (err) {
       res.status(500).send({
         success: false,
