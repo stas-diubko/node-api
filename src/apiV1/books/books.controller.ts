@@ -62,6 +62,30 @@ export default class BooksController {
         }
       };
 
+      public findOneBook = async (req: Request, res: Response): Promise<any> => {
+        try {
+          const book = await Book.findById(req.params.id);
+          if (!book) {
+            return res.status(404).send({
+              success: false,
+              message: 'Book not found',
+              data: null
+            });
+          }
+    
+          res.status(200).send({
+            success: true,
+            data: book
+          });
+        } catch (err) {
+          res.status(500).send({
+            success: false,
+            message: err.toString(),
+            data: null
+          });
+        }
+      };
+
       public updateBook = async (req: Request, res: Response): Promise<any> => {
         const { bookTitle, bookAuthor, bookDescript, bookPrice, bookImg} = req.body;
         // console.log(name);

@@ -32,6 +32,8 @@ export default class UserController {
 
   public findOne = async (req: Request, res: Response): Promise<any> => {
     try {
+      // console.log(req.headers);
+      
       const user = await User.findById(req.params.id, { password: 0 });
       if (!user) {
         return res.status(404).send({
@@ -40,7 +42,7 @@ export default class UserController {
           data: null
         });
       }
-
+ 
       res.status(200).send({
         success: true,
         data: user
@@ -81,7 +83,7 @@ export default class UserController {
            isAdmin = false
          }
        }
-       const userData = {id: userUpdated._id, name: userUpdated.name, email: userUpdated.email, img: userUpdated.imgChange, isAdmin: isAdmin}
+       const userData = {id: userUpdated._id, name: userUpdated.name, email: userUpdated.email, isAdmin: isAdmin}
        const token = await jwt.sign( {userData}, config.JWT_ENCRYPTION, {
          expiresIn: config.JWT_EXPIRATION
        });
@@ -112,7 +114,12 @@ export default class UserController {
   public remove = async (req: Request, res: Response): Promise<any> => {
     try {
       const user = await User.findByIdAndRemove(req.params.id);
-
+      // console.log(user);
+      Roles.findById('5d7f6f73c9fdeb2d84355d1e', (err, roles) => {
+        let index = roles.users.findIndex((i:any) => i.email == user.email);
+        roles.users.splice(index, 1)
+        roles.save()
+      })
       if (!user) {
         return res.status(404).send({
           success: false,

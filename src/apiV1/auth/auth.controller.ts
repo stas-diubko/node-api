@@ -34,15 +34,18 @@ export default class UserController {
       let isAdmin:any; 
       
        Roles.findById('5d7f6f73c9fdeb2d84355d1e', async (err, roles) => {
+      // console.log(roles.admins.length);
       
         for(let i = 0; i < roles.admins.length; i++){
-          if (roles.admins[i] == email) {
+          if (roles.admins[i] === email) {
             isAdmin = true;
+            break
           } else {
             isAdmin = false
           }
+          
         }
-        const userData = {id: user._id, name: user.name, email: user.email, img: user.imgChange, isAdmin: isAdmin}
+        const userData = {id: user._id, name: user.name, email: user.email, isAdmin: isAdmin}
         const token = await jwt.sign( {userData}, config.JWT_ENCRYPTION, {
           expiresIn: config.JWT_EXPIRATION
         });
