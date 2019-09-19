@@ -1,4 +1,3 @@
-import * as bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import * as jwt from 'jwt-then';
 import config from '../../config/config';
@@ -32,8 +31,7 @@ export default class UserController {
 
   public findOne = async (req: Request, res: Response): Promise<any> => {
     try {
-      // console.log(req.headers);
-      
+          
       const user = await User.findById(req.params.id, { password: 0 });
       if (!user) {
         return res.status(404).send({
@@ -58,8 +56,7 @@ export default class UserController {
 
   public update = async (req: Request, res: Response): Promise<any> => {
     const { name, imgChange} = req.body;
-    // console.log(name);
-    
+        
     try {
       const userUpdated = await User.findByIdAndUpdate(
         req.params.id,
@@ -79,6 +76,7 @@ export default class UserController {
        for(let i = 0; i < roles.admins.length; i++){
          if (roles.admins[i] == userUpdated.email) {
            isAdmin = true;
+           break
          } else {
            isAdmin = false
          }
@@ -100,7 +98,6 @@ export default class UserController {
       });
 
      })
-
       
     } catch (err) {
       res.status(500).send({
@@ -114,7 +111,7 @@ export default class UserController {
   public remove = async (req: Request, res: Response): Promise<any> => {
     try {
       const user = await User.findByIdAndRemove(req.params.id);
-      // console.log(user);
+     
       Roles.findById('5d7f6f73c9fdeb2d84355d1e', (err, roles) => {
         let index = roles.users.findIndex((i:any) => i.email == user.email);
         roles.users.splice(index, 1)

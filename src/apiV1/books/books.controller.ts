@@ -1,15 +1,10 @@
-import * as bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
-import * as jwt from 'jwt-then';
-import config from '../../config/config';
 import Book from './books.model'
 
 export default class BooksController {
     public addBook = async (req: Request, res: Response): Promise<any> => {
    
         const { bookTitle, bookAuthor, bookDescript, bookPrice, bookImg} = req.body;
-        // console.log(req.body);
-        
         try {
           
           const book = new Book({
@@ -88,7 +83,6 @@ export default class BooksController {
 
       public updateBook = async (req: Request, res: Response): Promise<any> => {
         const { bookTitle, bookAuthor, bookDescript, bookPrice, bookImg} = req.body;
-        // console.log(name);
         
         try {
           const bookUpdated = await Book.findByIdAndUpdate(

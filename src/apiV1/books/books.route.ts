@@ -10,5 +10,4 @@ book.put('/:id', controller.updateBook);
 book.delete('/:id', controller.removeBook);
 book.get('/:id', controller.findOneBook);
 
-
 export default book;

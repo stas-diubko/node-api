@@ -23,7 +23,6 @@ export default class UserController {
 
       const matchPasswords = await bcrypt.compare(pass, user.pass);
     
-
       if (!matchPasswords) {
         return res.status(401).send({
           success: false,
@@ -34,7 +33,6 @@ export default class UserController {
       let isAdmin:any; 
       
        Roles.findById('5d7f6f73c9fdeb2d84355d1e', async (err, roles) => {
-      // console.log(roles.admins.length);
       
         for(let i = 0; i < roles.admins.length; i++){
           if (roles.admins[i] === email) {
